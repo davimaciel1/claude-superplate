@@ -1,0 +1,85 @@
+{
+  "name": "Blog/CMS Template",
+  "description": "Content management system with MDX, categories, and SEO",
+  "version": "1.0.0",
+  "features": {
+    "mdx": true,
+    "categories": true,
+    "tags": true,
+    "search": true,
+    "comments": true,
+    "authors": true,
+    "rss": true,
+    "seo": true,
+    "newsletter": true,
+    "admin": true
+  },
+  "dependencies": [
+    "@clerk/nextjs",
+    "@mdx-js/loader",
+    "@mdx-js/react",
+    "@next/mdx",
+    "contentlayer",
+    "next-contentlayer",
+    "reading-time",
+    "rehype-autolink-headings",
+    "rehype-code-titles",
+    "rehype-prism-plus",
+    "rehype-slug",
+    "remark-gfm",
+    "fuse.js",
+    "feed",
+    "react-share",
+    "resend"
+  ],
+  "shadcnComponents": [
+    "avatar",
+    "badge",
+    "button",
+    "card",
+    "dialog",
+    "dropdown-menu",
+    "form",
+    "input",
+    "label",
+    "popover",
+    "scroll-area",
+    "separator",
+    "skeleton",
+    "textarea",
+    "toast",
+    "tooltip"
+  ],
+  "routes": [
+    {
+      "path": "/",
+      "type": "public",
+      "component": "homepage"
+    },
+    {
+      "path": "/blog",
+      "type": "public",
+      "component": "blog-listing"
+    },
+    {
+      "path": "/blog/[slug]",
+      "type": "public",
+      "component": "blog-post"
+    },
+    {
+      "path": "/categories",
+      "type": "public",
+      "component": "categories"
+    },
+    {
+      "path": "/authors",
+      "type": "public",
+      "component": "authors"
+    },
+    {
+      "path": "/admin",
+      "type": "admin",
+      "component": "cms"
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "name": "SaaS Template",
+  "description": "Complete SaaS boilerplate with authentication, billing, and multi-tenancy",
+  "version": "1.0.0",
+  "features": {
+    "auth": true,
+    "billing": true,
+    "multiTenancy": true,
+    "admin": true,
+    "api": true,
+    "webhooks": true,
+    "email": true,
+    "analytics": true
+  },
+  "dependencies": [
+    "@clerk/nextjs",
+    "stripe",
+    "@stripe/stripe-js",
+    "resend",
+    "@react-email/components",
+    "drizzle-orm",
+    "postgres",
+    "@tanstack/react-query",
+    "recharts",
+    "@tanstack/react-table",
+    "date-fns",
+    "zod",
+    "react-hook-form",
+    "@hookform/resolvers"
+  ],
+  "shadcnComponents": [
+    "accordion",
+    "alert",
+    "alert-dialog",
+    "avatar",
+    "badge",
+    "button",
+    "calendar",
+    "card",
+    "checkbox",
+    "collapsible",
+    "command",
+    "dialog",
+    "dropdown-menu",
+    "form",
+    "input",
+    "label",
+    "menubar",
+    "navigation-menu",
+    "popover",
+    "progress",
+    "radio-group",
+    "scroll-area",
+    "select",
+    "separator",
+    "sheet",
+    "skeleton",
+    "slider",
+    "switch",
+    "table",
+    "tabs",
+    "textarea",
+    "toast",
+    "toggle",
+    "tooltip",
+    "data-table",
+    "date-picker",
+    "chart"
+  ],
+  "routes": [
+    {
+      "path": "/",
+      "type": "public",
+      "component": "landing-page"
+    },
+    {
+      "path": "/pricing",
+      "type": "public",
+      "component": "pricing-page"
+    },
+    {
+      "path": "/dashboard",
+      "type": "protected",
+      "component": "dashboard"
+    },
+    {
+      "path": "/dashboard/team",
+      "type": "protected",
+      "component": "team-management"
+    },
+    {
+      "path": "/dashboard/billing",
+      "type": "protected",
+      "component": "billing"
+    },
+    {
+      "path": "/dashboard/settings",
+      "type": "protected",
+      "component": "settings"
+    },
+    {
+      "path": "/admin",
+      "type": "admin",
+      "component": "admin-panel"
+    }
+  ],
+  "env": {
+    "required": [
+      "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+      "CLERK_SECRET_KEY",
+      "DATABASE_URL",
+      "STRIPE_SECRET_KEY",
+      "STRIPE_WEBHOOK_SECRET",
+      "RESEND_API_KEY"
+    ],
+    "optional": [
+      "SENTRY_DSN",
+      "POSTHOG_KEY",
+      "REDIS_URL"
+    ]
+  }
+}

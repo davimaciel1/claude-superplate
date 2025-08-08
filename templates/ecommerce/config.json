@@ -1,0 +1,104 @@
+{
+  "name": "E-commerce Template",
+  "description": "Complete e-commerce solution with cart, checkout, and order management",
+  "version": "1.0.0",
+  "features": {
+    "auth": true,
+    "cart": true,
+    "checkout": true,
+    "orders": true,
+    "reviews": true,
+    "wishlist": true,
+    "search": true,
+    "admin": true,
+    "inventory": true,
+    "payments": true
+  },
+  "dependencies": [
+    "@clerk/nextjs",
+    "stripe",
+    "@stripe/stripe-js",
+    "drizzle-orm",
+    "postgres",
+    "@tanstack/react-query",
+    "@tanstack/react-table",
+    "embla-carousel-react",
+    "fuse.js",
+    "react-hook-form",
+    "zod",
+    "zustand",
+    "react-hot-toast"
+  ],
+  "shadcnComponents": [
+    "accordion",
+    "alert",
+    "avatar",
+    "badge",
+    "button",
+    "card",
+    "carousel",
+    "checkbox",
+    "dialog",
+    "drawer",
+    "dropdown-menu",
+    "form",
+    "input",
+    "label",
+    "popover",
+    "radio-group",
+    "scroll-area",
+    "select",
+    "separator",
+    "sheet",
+    "skeleton",
+    "slider",
+    "table",
+    "tabs",
+    "textarea",
+    "toast",
+    "toggle",
+    "toggle-group"
+  ],
+  "routes": [
+    {
+      "path": "/",
+      "type": "public",
+      "component": "homepage"
+    },
+    {
+      "path": "/products",
+      "type": "public",
+      "component": "product-catalog"
+    },
+    {
+      "path": "/products/[slug]",
+      "type": "public",
+      "component": "product-detail"
+    },
+    {
+      "path": "/cart",
+      "type": "public",
+      "component": "cart"
+    },
+    {
+      "path": "/checkout",
+      "type": "protected",
+      "component": "checkout"
+    },
+    {
+      "path": "/account",
+      "type": "protected",
+      "component": "account"
+    },
+    {
+      "path": "/account/orders",
+      "type": "protected",
+      "component": "orders"
+    },
+    {
+      "path": "/admin",
+      "type": "admin",
+      "component": "admin-dashboard"
+    }
+  ]
+}
