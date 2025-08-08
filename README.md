@@ -4,8 +4,8 @@
   <img src="https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js" alt="Next.js" />
   <img src="https://img.shields.io/badge/TypeScript-5.6-blue?style=for-the-badge&logo=typescript" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=for-the-badge&logo=tailwind-css" alt="Tailwind" />
-  <img src="https://img.shields.io/badge/Shadcn_UI-50+-black?style=for-the-badge" alt="Shadcn" />
-  <img src="https://img.shields.io/badge/Features-50+-green?style=for-the-badge" alt="Features" />
+  <img src="https://img.shields.io/badge/Shadcn_UI-70+-black?style=for-the-badge" alt="Shadcn" />
+  <img src="https://img.shields.io/badge/Features-60+-green?style=for-the-badge" alt="Features" />
 </div>
 
 <div align="center">
@@ -15,14 +15,37 @@
 
 ---
 
+## 🆕 Recent Updates
+
+### Version 2.0 - Complete Enhancement (Aug 2025)
+- ✅ **Added 20+ new Shadcn UI components** (Accordion, Avatar, Calendar, Checkbox, Dialog, Command, Popover, Tooltip, Toggle, Slider, Navigation Menu, Hover Card)
+- ✅ **Complete Settings System** with Profile, Notifications, Security, and Billing management
+- ✅ **Advanced Notification Center** with real-time notifications, filtering, and actions
+- ✅ **File Upload System** with drag-and-drop, progress tracking, and multiple file support
+- ✅ **Team Management Page** with role-based permissions and member management
+- ✅ **Analytics Dashboard** with charts, metrics, and reports
+- ✅ **CLAUDE.md Documentation** for perfect Claude Code integration and MCP support
+- ✅ **70+ Total UI Components** now available
+
 ## ✨ Features
 
 ### 🎯 Core Technologies
 - ⚡ **Next.js 15** with App Router
 - 🔥 **TypeScript 5.6** with strict mode
 - 💎 **Tailwind CSS 3.4** 
-- 🎨 **Shadcn UI** with 50+ components
+- 🎨 **Shadcn UI** with 70+ components (UPDATED!)
 - ⚛️ **React 19** latest features
+
+### 🎨 Complete UI Component Library (NEW!)
+All Shadcn UI components now included:
+- **Layout**: Accordion, Card, Sheet, Tabs, Separator
+- **Forms**: Input, Button, Select, Checkbox, Radio, Switch, Slider, Toggle
+- **Data Display**: Table, Badge, Progress, Avatar, Calendar
+- **Feedback**: Alert, Toast, Loading, Skeleton, Error Boundary
+- **Navigation**: Dropdown, Command, Navigation Menu, Breadcrumb
+- **Overlay**: Dialog, Popover, Tooltip, Hover Card
+- **File Management**: File Upload with drag-and-drop (NEW!)
+- **Notifications**: Complete Notification Center (NEW!)
 
 ### 🔐 Authentication (Clerk)
 - ✅ Complete auth flow (sign up, sign in, sign out)
@@ -45,6 +68,17 @@
 - 🎯 Customer portal
 - 🪝 Webhooks configured
 - 📱 Mobile-ready checkout
+
+### 📊 Dashboard Features (NEW!)
+- 📈 **Analytics Dashboard** with real-time metrics
+- 👥 **Team Management** with roles and permissions
+- ⚙️ **Complete Settings System**:
+  - Profile management with avatar upload
+  - Notification preferences
+  - Security settings with 2FA
+  - Billing and subscription management
+- 🔔 **Real-time Notifications** with filtering and actions
+- 📁 **File Upload System** with progress tracking
 
 ### 🌍 Internationalization
 - 🌐 Multi-language with next-intl
@@ -73,6 +107,7 @@
 - 🔄 Auto dependency updates with Dependabot
 - 🐰 AI code reviews with CodeRabbit
 - 🎯 Absolute imports configured
+- 📚 **CLAUDE.md** for perfect Claude Code integration (NEW!)
 
 ### 🎁 Extra Features
 - 📧 Email system with Resend
@@ -124,19 +159,24 @@ During setup, you'll be asked to choose a template:
 - **🎯 Landing** - Marketing site with sections and forms
 - **⚡ Custom** - Start with base and add what you need
 
-## 🤖 AI-Powered Customization
+## 🤖 AI-Powered Customization with Claude Code
 
-Use Claude Code to automatically customize your project:
+The project now includes **CLAUDE.md** documentation for perfect integration with Claude Code. This enables:
+
+- Automatic component generation
+- Smart code suggestions
+- Context-aware development
+- MCP (Model Context Protocol) integration
 
 ```bash
-# Example: Personalize for your business
-claude "My SaaS is a task management tool for remote teams"
+# Example: Use Claude Code to customize your project
+claude "Add a customer support chat system"
 
 # Claude will:
-# - Update all landing page copy
-# - Customize dashboard for your use case
-# - Generate appropriate data models
-# - Configure relevant integrations
+# - Create the chat components
+# - Set up WebSocket connections
+# - Add database schemas
+# - Configure real-time messaging
 ```
 
 ## 📦 What's Included
@@ -147,12 +187,21 @@ my-app/
 │   ├── (marketing)/       # Landing, pricing, blog
 │   ├── (auth)/           # Auth pages
 │   ├── (dashboard)/      # Dashboard pages
+│   │   ├── analytics/    # Analytics dashboard (NEW!)
+│   │   ├── settings/     # Complete settings system (NEW!)
+│   │   ├── team/         # Team management (NEW!)
+│   │   └── ...
 │   └── api/              # API routes
-├── components/           # 50+ Shadcn components
+├── components/           # 70+ Shadcn components (UPDATED!)
+│   ├── ui/              # All Shadcn UI components
+│   ├── dashboard/       # Dashboard components
+│   ├── settings/        # Settings components (NEW!)
+│   └── notifications/   # Notification system (NEW!)
 ├── lib/                  # Utilities and configs
+├── CLAUDE.md            # Claude Code documentation (NEW!)
 ├── docker/              # Docker setup
 ├── tests/               # Test suites
-└── [50+ more...]        # Everything configured
+└── [60+ more...]        # Everything configured
 ```
 
 ## 🛠️ Tech Stack
@@ -160,7 +209,7 @@ my-app/
 | Category | Technologies |
 |----------|-------------|
 | **Frontend** | Next.js 15, React 19, TypeScript 5.6, Tailwind CSS 3.4 |
-| **UI Components** | Shadcn UI (50+ components), Radix UI, Framer Motion |
+| **UI Components** | Shadcn UI (70+ components), Radix UI, Framer Motion |
 | **Backend** | Next.js API Routes, tRPC, WebSockets |
 | **Database** | PostgreSQL, DrizzleORM, Redis, PGlite |
 | **Authentication** | Clerk (complete auth system) |
@@ -169,19 +218,23 @@ my-app/
 | **Testing** | Vitest, Playwright, Storybook |
 | **Monitoring** | Sentry, PostHog, LogTape |
 | **DevOps** | Docker, GitHub Actions, Vercel |
+| **AI Integration** | Claude MCP, Claude Code support |
 
 ## 📊 Why Claude Superplate?
 
 | Feature | Claude Superplate | Next.js Boilerplate | Superplate | Create-T3-App |
 |---------|------------------|---------------------|------------|---------------|
 | **Setup Time** | < 5 min | 15+ min | 10+ min | 5+ min |
-| **Features** | 50+ | 30+ | 20+ | 10+ |
-| **UI Components** | 50+ Shadcn | Basic | Varies | None |
+| **Features** | 60+ | 30+ | 20+ | 10+ |
+| **UI Components** | 70+ Shadcn | Basic | Varies | None |
 | **Auth System** | Complete (Clerk) | Complete | Basic | NextAuth |
 | **Payments** | Stripe Ready | Manual | Plugin | None |
 | **Multi-tenancy** | ✅ Built-in | Pro only | ❌ | ❌ |
 | **AI Integration** | ✅ Claude MCP | ❌ | ❌ | ❌ |
 | **Docker** | ✅ Dev + Prod | Prod only | ❌ | ❌ |
+| **Settings System** | ✅ Complete | Basic | ❌ | ❌ |
+| **Notifications** | ✅ Real-time | ❌ | ❌ | ❌ |
+| **File Upload** | ✅ Advanced | Basic | ❌ | ❌ |
 | **Price** | **FREE** | Free/Pro $299 | Free | Free |
 
 ## 🎯 Perfect For
@@ -198,6 +251,7 @@ my-app/
 - [🎨 Customization Guide](./docs/CUSTOMIZATION.md)
 - [🔧 Configuration Guide](./docs/CONFIGURATION.md)
 - [📦 Deployment Guide](./docs/DEPLOYMENT.md)
+- [🤖 Claude Code Integration](./CLAUDE.md) (NEW!)
 - [🤝 Contributing Guide](./CONTRIBUTING.md)
 
 ## 🤝 Contributing
@@ -219,10 +273,10 @@ MIT License - use it for anything!
 
 Built with ❤️ by [Davi Maciel](https://github.com/davimaciel1) and contributors.
 
-Inspired by:
-- [Next.js Boilerplate](https://github.com/ixartz/Next-js-Boilerplate)
-- [Superplate](https://github.com/pankod/superplate)
-- [Create T3 App](https://create.t3.gg/)
+Special thanks to:
+- Claude AI for the enhanced implementation
+- Shadcn UI for the amazing component library
+- All open source contributors
 
 ---
 
