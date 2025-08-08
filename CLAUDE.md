@@ -1,300 +1,356 @@
 # Claude Code Context Documentation
 
 ## Project Overview
-This is a Next.js 14 enterprise boilerplate with 50+ features pre-configured, using TypeScript, Tailwind CSS, Shadcn UI (via MCP), Clerk Auth, and Stripe.
+This is a Next.js 14 enterprise boilerplate with 60+ features pre-configured, using TypeScript, Tailwind CSS, Shadcn UI (via MCP), Clerk Auth, and Stripe.
 
-## IMPORTANT: Shadcn UI MCP Integration
+## Architecture Overview
+- **Development**: Supabase (cloud PostgreSQL, free tier)
+- **Production**: Coolify with Docker Compose (PostgreSQL in container)
+- **Component Management**: Shadcn UI via MCP Server (NEVER create manually)
 
-This project uses the **Shadcn UI MCP Server** for component management. DO NOT create components manually.
+## CRITICAL RULES FOR CLAUDE
 
-### Setting up Shadcn MCP Server
+### 🚫 NEVER DO THIS:
+1. **NEVER** create files manually in `components/ui/`
+2. **NEVER** copy Shadcn component code from documentation
+3. **NEVER** suggest using `npx shadcn-ui add` directly
+4. **NEVER** create UI components without using MCP
 
-1. **Install the MCP Server globally:**
-```bash
-npm install -g @shadcn/ui-mcp-server
-```
+### ✅ ALWAYS DO THIS:
+1. **ALWAYS** use MCP commands to install Shadcn components
+2. **ALWAYS** check if component exists before installing
+3. **ALWAYS** validate environment variables before operations
+4. **ALWAYS** use TypeScript with proper types
+5. **ALWAYS** follow the existing project patterns
 
-2. **Configure Claude Desktop:**
-Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+## MCP Server Integration
 
-```json
-{
-  "mcpServers": {
-    "shadcn": {
-      "command": "npx",
-      "args": ["@shadcn/ui-mcp-server"],
-      "cwd": "/path/to/your/project"
-    }
-  }
-}
-```
-
-3. **Using MCP Commands in Claude:**
-Once configured, you can use these commands:
-- `add_component` - Add a Shadcn component
-- `add_components` - Add multiple components
-- `list_components` - List available components
-- `check_dependencies` - Check component dependencies
-- `add_dependencies` - Add required dependencies
-
-### Example MCP Usage
+### Available MCP Tools
+When the user asks for UI components, use these MCP commands:
 
 ```typescript
-// To add a component via MCP:
-// Use: add_component {"name": "button"}
+// List all available components
+list_components {}
 
-// To add multiple components:
-// Use: add_components {"names": ["dialog", "sheet", "dropdown-menu"]}
+// Install a single component
+add_component {"name": "button"}
 
-// To check what's available:
-// Use: list_components {}
+// Install multiple components
+add_components {"names": ["card", "dialog", "sheet"]}
+
+// Check component dependencies
+check_dependencies {"component": "calendar"}
+
+// Install required dependencies
+add_dependencies {}
 ```
 
-## Architecture Decisions
+### Component Installation Flow
+1. User asks for a feature requiring UI
+2. Identify needed Shadcn components
+3. Check if already installed: `list_components {}`
+4. Install missing components: `add_component {"name": "component-name"}`
+5. Import and use in the code
 
-### Tech Stack
-- **Framework**: Next.js 14 with App Router
-- **Language**: TypeScript 5.6 (strict mode)
-- **Styling**: Tailwind CSS 3.4 + Shadcn UI (via MCP)
-- **Database**: PostgreSQL with DrizzleORM
-- **Auth**: Clerk (complete auth system)
-- **Payments**: Stripe
-- **Email**: Resend + React Email
-- **Testing**: Vitest + Playwright
-- **Monitoring**: Sentry + PostHog
+### Example Interaction
+```typescript
+// User: "Create a user profile page with avatar and form"
 
-### Project Structure
+// Claude should:
+// 1. Install components via MCP
+add_components {"names": ["avatar", "card", "form", "input", "button", "label"]}
+
+// 2. Then create the page using installed components
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+// ... rest of the implementation
+```
+
+## Database Configuration
+
+### Development (Supabase)
+```env
+# .env.local
+DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres"
+```
+
+### Production (Coolify/Docker)
+```env
+# Set in Coolify dashboard
+DATABASE_URL="postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/claude_superplate"
+```
+
+### Database Commands
+```bash
+npm run db:push      # Apply schema to database
+npm run db:generate  # Generate migrations
+npm run db:studio    # Open Drizzle Studio
+```
+
+## Project Structure
 ```
 /
-├── app/                    # Next.js App Router
+├── app/                    # Next.js 14 App Router
 │   ├── (auth)/            # Auth pages (sign-in, sign-up)
 │   ├── (dashboard)/       # Protected dashboard pages
-│   ├── (marketing)/       # Public marketing pages
+│   │   ├── analytics/     # Analytics dashboard
+│   │   ├── settings/      # User settings (4 tabs)
+│   │   ├── team/          # Team management
+│   │   └── page.tsx       # Dashboard home
+│   ├── (marketing)/       # Public pages
+│   │   ├── page.tsx       # Landing page
+│   │   ├── pricing/       # Pricing page
+│   │   └── about/         # About page
 │   ├── api/               # API routes
-│   └── onboarding/        # User onboarding flow
+│   │   ├── webhooks/      # Stripe, Clerk webhooks
+│   │   └── [resource]/    # REST endpoints
+│   └── layout.tsx         # Root layout
+│
 ├── components/
-│   ├── ui/                # Shadcn UI components (installed via MCP)
-│   ├── dashboard/         # Dashboard-specific components
-│   └── providers/         # React context providers
+│   ├── ui/                # ⚠️ Shadcn UI (MCP ONLY - DO NOT EDIT)
+│   ├── dashboard/         # Dashboard components
+│   ├── settings/          # Settings components
+│   ├── notifications/     # Notification system
+│   └── providers/         # React providers
+│
 ├── lib/
-│   ├── api/              # API utilities
-│   ├── db/               # Database configuration
-│   ├── email/            # Email templates
-│   └── validations/      # Zod schemas
+│   ├── db/                # Database config
+│   │   ├── index.ts       # DB connection
+│   │   └── schema/        # Drizzle schemas
+│   ├── api/               # API helpers
+│   ├── email/             # Email templates
+│   └── validations/       # Zod schemas
+│
 ├── hooks/                 # Custom React hooks
-├── templates/            # Page templates
-├── tests/                # Test files
-└── docker/               # Docker configuration
+├── scripts/               # Build/deploy scripts
+│   ├── setup-mcp.js       # MCP setup script
+│   └── deploy.sh          # Coolify deploy script
+├── docker-compose.yml     # Production config
+└── CLAUDE.md             # This file
 ```
 
-## Development Guidelines
+## Feature Implementation Guide
 
-### Component Installation via MCP
-**NEVER manually create Shadcn UI components.** Always use the MCP server:
+### Adding a New Page
+1. Identify UI components needed
+2. Install via MCP: `add_components {"names": [...]}`
+3. Create page in appropriate directory
+4. Add to navigation if needed
 
-1. **Check available components:**
-```bash
-# In Claude, use the MCP command:
-list_components {}
-```
-
-2. **Add a single component:**
-```bash
-# In Claude, use the MCP command:
-add_component {"name": "accordion"}
-```
-
-3. **Add multiple components:**
-```bash
-# In Claude, use the MCP command:
-add_components {"names": ["avatar", "badge", "button"]}
-```
-
-4. **Check dependencies before adding:**
-```bash
-# In Claude, use the MCP command:
-check_dependencies {"component": "calendar"}
-```
-
-### Component Usage After Installation
-Once installed via MCP, import and use components:
-
+### Adding a Database Table
 ```typescript
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-
-export function MyComponent() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Title</CardTitle>
-        <CardDescription>Description</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Button>Click me</Button>
-      </CardContent>
-    </Card>
-  )
-}
-```
-
-### State Management
-- Use React hooks for local state
-- Use Zustand for global state (already installed)
-- Use React Query for server state
-
-### Database Operations
-- Use DrizzleORM for all database operations
-- Migrations: `npm run db:generate` then `npm run db:push`
-- View database: `npm run db:studio`
-
-### API Routes
-- Place API routes in `app/api/`
-- Use Next.js Route Handlers
-- Always validate input with Zod schemas from `lib/validations/`
-
-### Authentication
-- Clerk handles all authentication
-- Protected routes use Clerk middleware
-- User data available via Clerk hooks
-
-### Styling
-- Use Tailwind CSS utility classes
-- Custom styles in `app/globals.css`
-- Theme variables in CSS custom properties
-- Dark mode supported via next-themes
-
-## Common Tasks
-
-### Add a new page
-```typescript
-// app/(dashboard)/new-page/page.tsx
-export default function NewPage() {
-  return <div>New Page Content</div>
-}
-```
-
-### Add a new API endpoint
-```typescript
-// app/api/new-endpoint/route.ts
-import { NextRequest, NextResponse } from 'next/server'
-
-export async function GET(request: NextRequest) {
-  // Implementation
-  return NextResponse.json({ data: 'response' })
-}
-```
-
-### Add a new database table
-```typescript
-// lib/db/schema/new-table.ts
+// 1. Create schema in lib/db/schema/[name].ts
 import { pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core'
 
-export const newTable = pgTable('new_table', {
+export const tableName = pgTable('table_name', {
   id: serial('id').primaryKey(),
-  name: text('name').notNull(),
-  createdAt: timestamp('created_at').defaultNow(),
+  // ... fields
+})
+
+// 2. Generate and apply migration
+// Run: npm run db:generate
+// Run: npm run db:push
+```
+
+### Adding an API Route
+```typescript
+// app/api/[resource]/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs'
+import { db } from '@/lib/db'
+import { z } from 'zod'
+
+// Define validation schema
+const schema = z.object({
+  field: z.string().min(1),
+})
+
+export async function POST(request: NextRequest) {
+  // 1. Check authentication
+  const { userId } = auth()
+  if (!userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // 2. Validate input
+  const body = await request.json()
+  const data = schema.parse(body)
+
+  // 3. Database operation
+  const result = await db.insert(tableName).values(data)
+
+  // 4. Return response
+  return NextResponse.json(result)
+}
+```
+
+## Available Features
+
+### Already Implemented
+- ✅ Authentication (Clerk) - Complete auth system
+- ✅ Settings System - Profile, Notifications, Security, Billing
+- ✅ Analytics Dashboard - Charts and metrics
+- ✅ Team Management - Roles and permissions
+- ✅ Notification Center - Real-time notifications
+- ✅ File Upload - Drag & drop with progress
+- ✅ Dark Mode - Theme switching
+- ✅ Responsive Design - Mobile first
+
+### Services Configured
+- **Clerk**: Authentication
+- **Stripe**: Payments
+- **Resend**: Emails
+- **Sentry**: Error tracking
+- **PostHog**: Analytics
+
+## Common Patterns
+
+### Protected Routes
+```typescript
+// Routes under app/(dashboard)/ are automatically protected
+// Clerk middleware handles authentication
+```
+
+### Form Handling
+```typescript
+// Use react-hook-form with Zod validation
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+
+const schema = z.object({
+  name: z.string().min(1),
+})
+
+const form = useForm({
+  resolver: zodResolver(schema),
 })
 ```
 
-## MCP-Specific Commands Reference
+### Data Fetching
+```typescript
+// Server Components (preferred)
+async function getData() {
+  const data = await db.select().from(table)
+  return data
+}
 
-### Component Management
-- `add_component` - Add a single Shadcn UI component
-- `add_components` - Add multiple components at once
-- `list_components` - List all available components
-- `check_dependencies` - Check if dependencies are installed
-- `add_dependencies` - Install required dependencies
-
-### Theme Management
-- Components automatically inherit your app's theme
-- Modify theme in `app/globals.css`
-- Use CSS variables for dynamic theming
+// Client Components (when needed)
+// Use React Query or SWR
+```
 
 ## Environment Variables
-Required environment variables (see .env.example):
-- `DATABASE_URL` - PostgreSQL connection string
-- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Clerk public key
-- `CLERK_SECRET_KEY` - Clerk secret key
-- `STRIPE_SECRET_KEY` - Stripe secret key
-- `STRIPE_WEBHOOK_SECRET` - Stripe webhook secret
-- `RESEND_API_KEY` - Resend API key
 
-## Testing Strategy
-- Unit tests: `npm run test`
-- E2E tests: `npm run e2e`
-- Type checking: `npm run type-check`
-- Linting: `npm run lint`
+### Required for Development
+```env
+# Database (Supabase)
+DATABASE_URL="postgresql://..."
 
-## Deployment
-- Optimized for Vercel deployment
-- Docker support for self-hosting
-- Environment variables must be set in production
+# Authentication (Clerk)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_..."
+CLERK_SECRET_KEY="sk_test_..."
+
+# Payments (Stripe) - Optional for dev
+STRIPE_SECRET_KEY="sk_test_..."
+```
+
+### Required for Production (Coolify)
+All above plus:
+```env
+NODE_ENV="production"
+POSTGRES_PASSWORD="strong_password"
+NEXT_PUBLIC_APP_URL="https://yourdomain.com"
+```
+
+## Deployment Process
+
+### Development Workflow
+1. Code locally with Supabase database
+2. Test features
+3. Commit and push to GitHub
+
+### Production Deployment (Coolify)
+1. Push to main branch
+2. Coolify detects changes
+3. Runs docker-compose.yml
+4. PostgreSQL container starts
+5. Migrations apply automatically
+6. App builds and deploys
+
+## Testing Guidelines
+
+```bash
+npm run test          # Unit tests
+npm run e2e          # E2E tests
+npm run type-check   # TypeScript validation
+npm run lint         # ESLint
+```
 
 ## Performance Considerations
-- Images optimized with Next.js Image component
-- Lazy loading implemented
-- Code splitting automatic with Next.js
-- Database queries optimized with proper indexes
+- Images: Use Next.js Image component
+- Fonts: Already optimized with next/font
+- Code splitting: Automatic with Next.js
+- Database: Indexes on foreign keys
 
 ## Security Best Practices
-- All user input validated with Zod
-- CSRF protection via Clerk
-- SQL injection prevented by DrizzleORM
-- XSS protection built into React
-- Environment variables for secrets
+- Input validation: Always use Zod
+- SQL injection: Protected by Drizzle ORM
+- XSS: Protected by React
+- CSRF: Protected by Clerk
+- Secrets: Use environment variables
 
 ## Troubleshooting
 
-### MCP Server not working
-1. Ensure MCP server is installed: `npm install -g @shadcn/ui-mcp-server`
-2. Check Claude Desktop config file location
-3. Restart Claude Desktop after config changes
-4. Verify project path in config
+### MCP Not Working
+1. Run: `npm run setup:mcp`
+2. Restart Claude Desktop
+3. Check config path is correct
 
-### Component not installing
-1. Check if component exists: `list_components {}`
-2. Verify dependencies: `check_dependencies {"component": "name"}`
-3. Install dependencies first if needed: `add_dependencies {}`
+### Database Connection Failed
+1. Check DATABASE_URL in .env.local
+2. For Supabase: Check project is active
+3. For local: Check PostgreSQL is running
 
-### Database connection issues
-1. Ensure Docker is running: `docker-compose up -d`
-2. Check logs: `docker-compose logs postgres`
-3. Reset database: `npm run db:push`
+### Component Not Found
+1. Install via MCP: `add_component {"name": "component-name"}`
+2. Never create manually in components/ui/
 
-### Build errors
-1. Clear cache: `rm -rf .next node_modules`
-2. Reinstall: `npm install`
-3. Check TypeScript: `npm run type-check`
-
-### Authentication issues
-1. Verify Clerk keys in `.env.local`
-2. Check Clerk dashboard for domain configuration
-3. Clear cookies and local storage
-
-## Code Quality Standards
-- Follow ESLint rules (configured)
-- Use Prettier for formatting
-- Commit messages follow Conventional Commits
-- All code must pass TypeScript strict mode
-- Write tests for new features
+## Available Scripts
+```bash
+npm run dev          # Start development
+npm run build        # Build for production
+npm run setup:mcp    # Configure MCP
+npm run db:push      # Apply database schema
+npm run db:studio    # Database GUI
+```
 
 ## Important Notes for Claude
 
-When asked to add UI components:
-1. ALWAYS use the MCP server commands
-2. NEVER manually create component files in components/ui/
-3. Check if component exists first with `list_components`
-4. Install via `add_component` or `add_components`
-5. Only create custom components in other directories
+### When User Asks for UI Components
+1. ALWAYS use MCP to install Shadcn components
+2. NEVER manually create files in components/ui/
+3. Check what's installed: `list_components {}`
+4. Install what's needed: `add_component {"name": "..."}`
 
-When building features:
-1. Use installed Shadcn components from components/ui/
-2. Create feature-specific components in appropriate directories
-3. Follow the existing patterns in the codebase
-4. Always use TypeScript with proper types
+### When User Asks for Features
+1. Identify required components
+2. Install via MCP
+3. Create feature using installed components
+4. Follow existing patterns in codebase
 
-## Contact & Support
-- GitHub Issues for bug reports
-- Discussions for questions
-- Pull requests welcome (see CONTRIBUTING.md)
+### When User Asks About Database
+1. Development uses Supabase (cloud)
+2. Production uses PostgreSQL (Docker)
+3. Both use same schema via Drizzle ORM
+
+### When User Asks About Deployment
+1. Development: Local with npm run dev
+2. Production: Coolify with Docker Compose
+3. Automatic deployments on git push
+
+## Support & Documentation
+- Shadcn UI: https://ui.shadcn.com
+- Clerk: https://clerk.com/docs
+- Drizzle: https://orm.drizzle.team
+- Coolify: https://coolify.io/docs
