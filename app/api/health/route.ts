@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { sql } from 'drizzle-orm'
 
 /**
  * Health check endpoint for monitoring
@@ -7,8 +8,8 @@ import { db } from '@/lib/db'
  */
 export async function GET() {
   try {
-    // Check database connection
-    await db.execute('SELECT 1')
+    // Check database connection with Drizzle
+    const result = await db.select({ count: sql`1` }).from(sql`(SELECT 1) AS dummy`)
     
     // Return healthy status
     return NextResponse.json({
@@ -16,6 +17,7 @@ export async function GET() {
       timestamp: new Date().toISOString(),
       service: 'claude-superplate',
       database: 'connected',
+      version: '2.0.0',
     })
   } catch (error) {
     // Return unhealthy status

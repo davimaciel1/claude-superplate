@@ -1,40 +1,21 @@
-import { pgTable, text, timestamp, uuid, pgEnum } from 'drizzle-orm/pg-core'
-import { relations } from 'drizzle-orm'
-import { organizations } from './organizations'
-
-export const subscriptionStatusEnum = pgEnum('subscription_status', [
-  'active',
-  'canceled',
-  'past_due',
-  'trialing',
-  'incomplete',
-  'incomplete_expired',
-])
+import { pgTable, text, timestamp, boolean, integer, uuid } from 'drizzle-orm/pg-core'
+import { users } from './users'
+import { teams } from './teams'
 
 export const subscriptions = pgTable('subscriptions', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  organizationId: uuid('organization_id').references(() => organizations.id, { onDelete: 'cascade' }),
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: text('user_id').references(() => users.id),
+  teamId: uuid('team_id').references(() => teams.id),
   stripeCustomerId: text('stripe_customer_id'),
-  stripeSubscriptionId: text('stripe_subscription_id').unique(),
+  stripeSubscriptionId: text('stripe_subscription_id'),
   stripePriceId: text('stripe_price_id'),
-  status: subscriptionStatusEnum('status'),
+  status: text('status'), // active, canceled, past_due, etc
   currentPeriodStart: timestamp('current_period_start'),
   currentPeriodEnd: timestamp('current_period_end'),
-  cancelAt: timestamp('cancel_at'),
-  canceledAt: timestamp('canceled_at'),
-  trialStart: timestamp('trial_start'),
-  trialEnd: timestamp('trial_end'),
-  metadata: text('metadata').$type<Record<string, any>>().default('{}'),
+  cancelAtPeriodEnd: boolean('cancel_at_period_end').default(false),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 })
-
-export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
-  organization: one(organizations, {
-    fields: [subscriptions.organizationId],
-    references: [organizations.id],
-  }),
-}))
 
 export type Subscription = typeof subscriptions.$inferSelect
 export type NewSubscription = typeof subscriptions.$inferInsert
