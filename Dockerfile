@@ -1,46 +1,60 @@
-# Multi-stage build for production
+# ==========================================
+# 🐳 DOCKERFILE - OTIMIZADO PARA PRODUÇÃO
+# ==========================================
+
+# Stage 1: Dependencies
 FROM node:20-alpine AS deps
-# Install dependencies only when needed
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy dependency files
+# Copiar arquivos de dependência
 COPY package.json package-lock.json* ./
+COPY .npmrc* ./
+
+# Instalar dependências
 RUN npm ci --only=production
 
-# Rebuild the source code only when needed
+# Stage 2: Builder
 FROM node:20-alpine AS builder
 WORKDIR /app
+
+# Copiar dependências do stage anterior
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build the application
+# Build da aplicação
 ENV NEXT_TELEMETRY_DISABLED 1
 RUN npm run build
 
-# Production image, copy all the files and run next
+# Stage 3: Runner
 FROM node:20-alpine AS runner
 WORKDIR /app
 
+# Configurar ambiente de produção
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
+# Criar usuário não-root
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy built application
+# Copiar arquivos necessários
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
-# Copy scripts for database migrations
-COPY --from=builder /app/scripts ./scripts
+# Criar diretório de uploads com permissões corretas
+RUN mkdir -p /app/public/uploads && chown -R nextjs:nodejs /app/public/uploads
 
+# Trocar para usuário não-root
 USER nextjs
 
+# Expor porta
 EXPOSE 3000
 
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
+# Comando de inicialização
 CMD ["node", "server.js"]

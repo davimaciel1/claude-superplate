@@ -1,31 +1,63 @@
+# ==========================================
+# 🐳 DOCKER COMPOSE - PRODUÇÃO NO COOLIFY
+# ==========================================
+# Este arquivo será usado automaticamente pelo Coolify
+# Ele criará o PostgreSQL e a aplicação em containers
+
 version: '3.8'
 
 services:
-  # Next.js Application
+  # ==========================================
+  # 🚀 APLICAÇÃO NEXT.JS
+  # ==========================================
   app:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production
     container_name: claude-superplate-app
     restart: unless-stopped
     ports:
       - "${PORT:-3000}:3000"
     environment:
-      NODE_ENV: ${NODE_ENV:-production}
-      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-superplate}?sslmode=disable
-      REDIS_URL: redis://redis:6379
-      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      # Database
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/claude_superplate
+      
+      # Node
+      NODE_ENV: production
+      
+      # Clerk Auth
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
+      NEXT_PUBLIC_CLERK_SIGN_IN_URL: ${NEXT_PUBLIC_CLERK_SIGN_IN_URL:-/sign-in}
+      NEXT_PUBLIC_CLERK_SIGN_UP_URL: ${NEXT_PUBLIC_CLERK_SIGN_UP_URL:-/sign-up}
+      NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: ${NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL:-/dashboard}
+      NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: ${NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL:-/dashboard}
+      
+      # Stripe
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+      
+      # Email
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      EMAIL_FROM: ${EMAIL_FROM}
+      
+      # App
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      
+      # Monitoring
+      NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN}
+      NEXT_PUBLIC_POSTHOG_KEY: ${NEXT_PUBLIC_POSTHOG_KEY}
+      NEXT_PUBLIC_POSTHOG_HOST: ${NEXT_PUBLIC_POSTHOG_HOST:-https://app.posthog.com}
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
+      db:
         condition: service_healthy
     networks:
-      - superplate-network
+      - app-network
     volumes:
-      - ./:/app
-      - /app/node_modules
-      - /app/.next
+      - uploads:/app/public/uploads
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s
@@ -33,49 +65,43 @@ services:
       retries: 3
       start_period: 40s
 
-  # PostgreSQL Database
-  postgres:
+  # ==========================================
+  # 🗄️ BANCO DE DADOS POSTGRESQL
+  # ==========================================
+  db:
     image: postgres:15-alpine
     container_name: claude-superplate-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-      POSTGRES_DB: ${DB_NAME:-superplate}
-      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: claude_superplate
+      PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
-      - superplate-network
+      - app-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-superplate}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
+    ports:
+      - "5432:5432" # Exponha apenas se precisar acessar externamente
 
-  # Redis Cache
-  redis:
-    image: redis:7-alpine
-    container_name: claude-superplate-redis
-    restart: unless-stopped
-    volumes:
-      - redis_data:/data
-    networks:
-      - superplate-network
-    command: redis-server --save 20 1 --loglevel warning
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+# ==========================================
+# 🌐 NETWORKS
+# ==========================================
+networks:
+  app-network:
+    driver: bridge
 
+# ==========================================
+# 💾 VOLUMES
+# ==========================================
 volumes:
   postgres_data:
     driver: local
-  redis_data:
+  uploads:
     driver: local
-
-networks:
-  superplate-network:
-    driver: bridge
