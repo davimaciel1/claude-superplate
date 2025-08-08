@@ -1,0 +1,81 @@
+{
+  "project": {
+    "name": "claude-superplate",
+    "type": "template",
+    "version": "1.0.0",
+    "description": "Complete Next.js boilerplate with 50+ enterprise features"
+  },
+  "templates": {
+    "saas": {
+      "name": "SaaS Platform",
+      "description": "Multi-tenant SaaS with dashboard, billing, and teams",
+      "features": ["auth", "dashboard", "billing", "teams", "api", "analytics"],
+      "pages": ["/", "/pricing", "/blog", "/dashboard", "/settings", "/team", "/billing"]
+    },
+    "ecommerce": {
+      "name": "E-commerce",
+      "description": "Full e-commerce with cart, checkout, and orders",
+      "features": ["auth", "products", "cart", "checkout", "orders", "reviews"],
+      "pages": ["/", "/products", "/cart", "/checkout", "/account", "/orders"]
+    },
+    "blog": {
+      "name": "Blog/CMS",
+      "description": "Blog with MDX, SEO, and categories",
+      "features": ["auth", "posts", "categories", "comments", "seo"],
+      "pages": ["/", "/blog", "/categories", "/about", "/contact"]
+    }
+  },
+  "features": {
+    "auth": {
+      "provider": "clerk",
+      "features": ["magic-links", "social", "mfa", "passkeys"]
+    },
+    "database": {
+      "orm": "drizzle",
+      "provider": "postgresql",
+      "local": "pglite"
+    },
+    "payments": {
+      "provider": "stripe",
+      "features": ["subscriptions", "checkout", "webhooks", "portal"]
+    },
+    "email": {
+      "provider": "resend",
+      "templates": ["welcome", "reset", "invoice", "notification"]
+    },
+    "monitoring": {
+      "error": "sentry",
+      "analytics": "posthog",
+      "logs": "logtape"
+    }
+  },
+  "styles": {
+    "modern": {
+      "name": "Modern",
+      "description": "Gradients, animations, and glassmorphism",
+      "colors": {
+        "primary": "#8B5CF6",
+        "secondary": "#3B82F6",
+        "accent": "#EC4899"
+      }
+    },
+    "minimal": {
+      "name": "Minimal",
+      "description": "Clean, simple, and typography-focused",
+      "colors": {
+        "primary": "#000000",
+        "secondary": "#6B7280",
+        "accent": "#111827"
+      }
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "description": "Professional and corporate",
+      "colors": {
+        "primary": "#2563EB",
+        "secondary": "#475569",
+        "accent": "#0EA5E9"
+      }
+    }
+  }
+}
