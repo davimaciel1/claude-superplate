@@ -1,21 +1,55 @@
 version: '3.8'
 
 services:
+  # Next.js Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: claude-superplate-app
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-superplate}?sslmode=disable
+      REDIS_URL: redis://redis:6379
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - superplate-network
+    volumes:
+      - ./:/app
+      - /app/node_modules
+      - /app/.next
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
     container_name: claude-superplate-db
     restart: unless-stopped
-    ports:
-      - "5432:5432"
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
       POSTGRES_DB: ${DB_NAME:-superplate}
+      POSTGRES_HOST_AUTH_METHOD: trust
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - superplate-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-superplate}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -25,61 +59,23 @@ services:
     image: redis:7-alpine
     container_name: claude-superplate-redis
     restart: unless-stopped
-    ports:
-      - "6379:6379"
     volumes:
       - redis_data:/data
+    networks:
+      - superplate-network
+    command: redis-server --save 20 1 --loglevel warning
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # MinIO (S3-compatible storage)
-  minio:
-    image: minio/minio:latest
-    container_name: claude-superplate-minio
-    restart: unless-stopped
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
-    volumes:
-      - minio_data:/data
-    command: server /data --console-address ":9001"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
-
-  # Mailhog (Email testing)
-  mailhog:
-    image: mailhog/mailhog:latest
-    container_name: claude-superplate-mailhog
-    restart: unless-stopped
-    ports:
-      - "1025:1025" # SMTP port
-      - "8025:8025" # Web UI
-    environment:
-      MH_STORAGE: maildir
-      MH_MAILDIR_PATH: /maildir
-    volumes:
-      - mailhog_data:/maildir
-
 volumes:
   postgres_data:
     driver: local
   redis_data:
     driver: local
-  minio_data:
-    driver: local
-  mailhog_data:
-    driver: local
 
 networks:
-  default:
-    name: claude-superplate-network
+  superplate-network:
     driver: bridge
