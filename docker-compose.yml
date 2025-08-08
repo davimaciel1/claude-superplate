@@ -1,31 +1,18 @@
-# ==========================================
-# 🐳 DOCKER COMPOSE - PRODUÇÃO NO COOLIFY
-# ==========================================
-# Este arquivo será usado automaticamente pelo Coolify
-# Ele criará o PostgreSQL e a aplicação em containers
-
 version: '3.8'
 
 services:
-  # ==========================================
-  # 🚀 APLICAÇÃO NEXT.JS
-  # ==========================================
   app:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        - NODE_ENV=production
-    container_name: claude-superplate-app
-    restart: unless-stopped
     ports:
       - "${PORT:-3000}:3000"
     environment:
-      # Database
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/claude_superplate
+      # Banco de dados - usa o container PostgreSQL
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/claude_superplate
       
-      # Node
-      NODE_ENV: production
+      # Node environment
+      NODE_ENV: ${NODE_ENV:-production}
       
       # Clerk Auth
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
@@ -42,22 +29,19 @@ services:
       
       # Email
       RESEND_API_KEY: ${RESEND_API_KEY}
-      EMAIL_FROM: ${EMAIL_FROM}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@app.com}
       
-      # App
-      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      # App URL
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
       
-      # Monitoring
+      # Optional services
       NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN}
       NEXT_PUBLIC_POSTHOG_KEY: ${NEXT_PUBLIC_POSTHOG_KEY}
       NEXT_PUBLIC_POSTHOG_HOST: ${NEXT_PUBLIC_POSTHOG_HOST:-https://app.posthog.com}
     depends_on:
       db:
         condition: service_healthy
-    networks:
-      - app-network
-    volumes:
-      - uploads:/app/public/uploads
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
       interval: 30s
@@ -65,43 +49,23 @@ services:
       retries: 3
       start_period: 40s
 
-  # ==========================================
-  # 🗄️ BANCO DE DADOS POSTGRESQL
-  # ==========================================
   db:
     image: postgres:15-alpine
-    container_name: claude-superplate-db
-    restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: claude_superplate
-      PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    networks:
-      - app-network
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
-    ports:
-      - "5432:5432" # Exponha apenas se precisar acessar externamente
 
-# ==========================================
-# 🌐 NETWORKS
-# ==========================================
-networks:
-  app-network:
-    driver: bridge
-
-# ==========================================
-# 💾 VOLUMES
-# ==========================================
 volumes:
   postgres_data:
-    driver: local
-  uploads:
     driver: local
