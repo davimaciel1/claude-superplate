@@ -1,25 +1,17 @@
-import { redirect } from 'next/navigation'
-import { auth } from '@clerk/nextjs'
-import DashboardNav from '@/components/dashboard/nav'
-import DashboardHeader from '@/components/dashboard/header'
+import { Sidebar } from "@/components/dashboard/sidebar"
+import { DashboardHeader } from "@/components/dashboard/header"
 
-export default async function DashboardLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const { userId } = auth()
-
-  if (!userId) {
-    redirect('/sign-in')
-  }
-
   return (
-    <div className="flex min-h-screen">
-      <DashboardNav />
-      <div className="flex-1 flex flex-col">
+    <div className="flex h-screen overflow-hidden">
+      <Sidebar />
+      <div className="flex flex-1 flex-col overflow-hidden">
         <DashboardHeader />
-        <main className="flex-1 bg-muted/10">
+        <main className="flex-1 overflow-y-auto bg-muted/10 p-4 md:p-6">
           {children}
         </main>
       </div>
