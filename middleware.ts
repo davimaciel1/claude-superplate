@@ -3,15 +3,14 @@ import { authMiddleware } from '@clerk/nextjs'
 export default authMiddleware({
   publicRoutes: [
     '/',
-    '/api/health',
-    '/api/webhooks/(.*)',
     '/sign-in',
     '/sign-up',
+    '/api/health',
+    '/api/webhooks/(.*)',
     '/pricing',
+    '/about',
     '/blog',
     '/blog/(.*)',
-    '/docs',
-    '/docs/(.*)',
   ],
   ignoredRoutes: [
     '/api/health',

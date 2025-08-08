@@ -6,12 +6,16 @@ import * as schema from './schema'
 const getDatabaseUrl = () => {
   const url = process.env.DATABASE_URL
   
-  if (!url) {
+  if (!url && process.env.NODE_ENV === 'production') {
     throw new Error(
-      'DATABASE_URL is not defined. Please check your .env.local file.\n' +
-      'For development, use Supabase (free): https://supabase.com\n' +
-      'For production, Coolify will set this automatically.'
+      'DATABASE_URL is not defined in production. Please check your environment variables.'
     )
+  }
+  
+  // Return a dummy URL for build time
+  if (!url) {
+    console.warn('DATABASE_URL not set, using placeholder for build')
+    return 'postgresql://user:pass@localhost:5432/db'
   }
   
   return url
@@ -19,7 +23,14 @@ const getDatabaseUrl = () => {
 
 // Create the connection
 const connectionString = getDatabaseUrl()
-const sql = postgres(connectionString)
+
+// Configure connection options
+const sql = postgres(connectionString, {
+  ssl: connectionString.includes('supabase.co') ? 'require' : false,
+  max: 1, // For serverless environments
+  idle_timeout: 20,
+  connect_timeout: 10,
+})
 
 // Create drizzle instance
 export const db = drizzle(sql, { schema })
