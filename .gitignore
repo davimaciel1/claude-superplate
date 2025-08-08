@@ -8,7 +8,6 @@
 
 # testing
 /coverage
-/.nyc_output
 
 # next.js
 /.next/
@@ -28,10 +27,7 @@ yarn-error.log*
 
 # local env files
 .env*.local
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env
 
 # vercel
 .vercel
@@ -40,41 +36,16 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# database
-*.db
-*.db-journal
-*.sqlite
-*.sqlite3
+# docker
+postgres-data/
 
-# IDE
-.idea
-.vscode
+# ide
+.idea/
+.vscode/
 *.swp
 *.swo
-*~
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
 
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-logs
-*.log
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Docker
-postgres_data/
-redis_data/
-minio_data/
-mailhog_data/
+# Shadcn UI components (installed via MCP)
+# Uncomment if you want to ignore MCP-installed components
+# components/ui/*
+# !components/ui/.gitkeep
