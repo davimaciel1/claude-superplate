@@ -1,14 +1,61 @@
 # Claude Code Context Documentation
 
 ## Project Overview
-This is a Next.js 14 enterprise boilerplate with 50+ features pre-configured, using TypeScript, Tailwind CSS, Shadcn UI, Clerk Auth, and Stripe.
+This is a Next.js 14 enterprise boilerplate with 50+ features pre-configured, using TypeScript, Tailwind CSS, Shadcn UI (via MCP), Clerk Auth, and Stripe.
+
+## IMPORTANT: Shadcn UI MCP Integration
+
+This project uses the **Shadcn UI MCP Server** for component management. DO NOT create components manually.
+
+### Setting up Shadcn MCP Server
+
+1. **Install the MCP Server globally:**
+```bash
+npm install -g @shadcn/ui-mcp-server
+```
+
+2. **Configure Claude Desktop:**
+Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+
+```json
+{
+  "mcpServers": {
+    "shadcn": {
+      "command": "npx",
+      "args": ["@shadcn/ui-mcp-server"],
+      "cwd": "/path/to/your/project"
+    }
+  }
+}
+```
+
+3. **Using MCP Commands in Claude:**
+Once configured, you can use these commands:
+- `add_component` - Add a Shadcn component
+- `add_components` - Add multiple components
+- `list_components` - List available components
+- `check_dependencies` - Check component dependencies
+- `add_dependencies` - Add required dependencies
+
+### Example MCP Usage
+
+```typescript
+// To add a component via MCP:
+// Use: add_component {"name": "button"}
+
+// To add multiple components:
+// Use: add_components {"names": ["dialog", "sheet", "dropdown-menu"]}
+
+// To check what's available:
+// Use: list_components {}
+```
 
 ## Architecture Decisions
 
 ### Tech Stack
 - **Framework**: Next.js 14 with App Router
 - **Language**: TypeScript 5.6 (strict mode)
-- **Styling**: Tailwind CSS 3.4 + Shadcn UI
+- **Styling**: Tailwind CSS 3.4 + Shadcn UI (via MCP)
 - **Database**: PostgreSQL with DrizzleORM
 - **Auth**: Clerk (complete auth system)
 - **Payments**: Stripe
@@ -26,14 +73,13 @@ This is a Next.js 14 enterprise boilerplate with 50+ features pre-configured, us
 │   ├── api/               # API routes
 │   └── onboarding/        # User onboarding flow
 ├── components/
-│   ├── ui/                # Shadcn UI components
+│   ├── ui/                # Shadcn UI components (installed via MCP)
 │   ├── dashboard/         # Dashboard-specific components
 │   └── providers/         # React context providers
 ├── lib/
 │   ├── api/              # API utilities
 │   ├── db/               # Database configuration
 │   ├── email/            # Email templates
-│   ├── shadcn-mcp/       # Shadcn MCP integration
 │   └── validations/      # Zod schemas
 ├── hooks/                 # Custom React hooks
 ├── templates/            # Page templates
@@ -43,11 +89,54 @@ This is a Next.js 14 enterprise boilerplate with 50+ features pre-configured, us
 
 ## Development Guidelines
 
-### Component Creation
-1. Use Shadcn UI components when possible: `npx shadcn-ui@latest add [component]`
-2. Place new components in appropriate directories
-3. Follow the existing naming conventions (kebab-case for files)
-4. Always use TypeScript with proper types
+### Component Installation via MCP
+**NEVER manually create Shadcn UI components.** Always use the MCP server:
+
+1. **Check available components:**
+```bash
+# In Claude, use the MCP command:
+list_components {}
+```
+
+2. **Add a single component:**
+```bash
+# In Claude, use the MCP command:
+add_component {"name": "accordion"}
+```
+
+3. **Add multiple components:**
+```bash
+# In Claude, use the MCP command:
+add_components {"names": ["avatar", "badge", "button"]}
+```
+
+4. **Check dependencies before adding:**
+```bash
+# In Claude, use the MCP command:
+check_dependencies {"component": "calendar"}
+```
+
+### Component Usage After Installation
+Once installed via MCP, import and use components:
+
+```typescript
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+
+export function MyComponent() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Title</CardTitle>
+        <CardDescription>Description</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button>Click me</Button>
+      </CardContent>
+    </Card>
+  )
+}
+```
 
 ### State Management
 - Use React hooks for local state
@@ -108,6 +197,20 @@ export const newTable = pgTable('new_table', {
 })
 ```
 
+## MCP-Specific Commands Reference
+
+### Component Management
+- `add_component` - Add a single Shadcn UI component
+- `add_components` - Add multiple components at once
+- `list_components` - List all available components
+- `check_dependencies` - Check if dependencies are installed
+- `add_dependencies` - Install required dependencies
+
+### Theme Management
+- Components automatically inherit your app's theme
+- Modify theme in `app/globals.css`
+- Use CSS variables for dynamic theming
+
 ## Environment Variables
 Required environment variables (see .env.example):
 - `DATABASE_URL` - PostgreSQL connection string
@@ -141,23 +244,18 @@ Required environment variables (see .env.example):
 - XSS protection built into React
 - Environment variables for secrets
 
-## MCP Integration for Shadcn UI
-
-### Installation
-The Shadcn MCP client is already integrated in `lib/shadcn-mcp/`. 
-
-To install the MCP server for Claude Code:
-```bash
-npx @shadcn/ui-mcp init
-```
-
-### Available MCP Commands
-- `add-component [name]` - Add a Shadcn component
-- `list-components` - List available components
-- `update-component [name]` - Update a component
-- `check-dependencies` - Check component dependencies
-
 ## Troubleshooting
+
+### MCP Server not working
+1. Ensure MCP server is installed: `npm install -g @shadcn/ui-mcp-server`
+2. Check Claude Desktop config file location
+3. Restart Claude Desktop after config changes
+4. Verify project path in config
+
+### Component not installing
+1. Check if component exists: `list_components {}`
+2. Verify dependencies: `check_dependencies {"component": "name"}`
+3. Install dependencies first if needed: `add_dependencies {}`
 
 ### Database connection issues
 1. Ensure Docker is running: `docker-compose up -d`
@@ -180,6 +278,21 @@ npx @shadcn/ui-mcp init
 - Commit messages follow Conventional Commits
 - All code must pass TypeScript strict mode
 - Write tests for new features
+
+## Important Notes for Claude
+
+When asked to add UI components:
+1. ALWAYS use the MCP server commands
+2. NEVER manually create component files in components/ui/
+3. Check if component exists first with `list_components`
+4. Install via `add_component` or `add_components`
+5. Only create custom components in other directories
+
+When building features:
+1. Use installed Shadcn components from components/ui/
+2. Create feature-specific components in appropriate directories
+3. Follow the existing patterns in the codebase
+4. Always use TypeScript with proper types
 
 ## Contact & Support
 - GitHub Issues for bug reports
